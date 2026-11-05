@@ -1,0 +1,6 @@
+[
+  {"entrada": "111#010", "aceptada": true, "explicacion": "3 unos y 3 bits."},
+  {"entrada": "1111#1010", "aceptada": true, "explicacion": "4 unos y 4 bits."},
+  {"entrada": "111#01", "aceptada": false, "explicacion": "3 unos y solo 2 bits."},
+  {"entrada": "11#010", "aceptada": false, "explicacion": "2 unos y 3 bits."}
+]

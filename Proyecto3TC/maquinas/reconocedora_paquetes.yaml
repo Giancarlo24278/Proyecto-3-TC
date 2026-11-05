@@ -1,0 +1,39 @@
+# MT determinista de una cinta. Las reglas ausentes significan rechazo.
+# Lenguaje: { 1^n # w | n >= 1, w pertenece a {0,1}*, |w| = n }.
+nombre: reconocedora_paquetes
+estados: [q_inicio, q_buscar_uno, q_buscar_separador, q_buscar_bit, q_regresar, q_comprobar, q_aceptar, q_rechazar]
+alfabeto_entrada: ['0', '1', '#']
+alfabeto_cinta: ['0', '1', '#', X, Y, '_']
+blanco: '_'
+estado_inicial: q_inicio
+estados_aceptacion: [q_aceptar]
+estados_rechazo: [q_rechazar]
+transiciones:
+  - {origen: q_inicio, leer: '1', siguiente: q_buscar_separador, escribir: X, mover: R}
+  - {origen: q_inicio, leer: '0', siguiente: q_rechazar, escribir: '0', mover: S}
+  - {origen: q_inicio, leer: '#', siguiente: q_rechazar, escribir: '#', mover: S}
+  - {origen: q_inicio, leer: '_', siguiente: q_rechazar, escribir: '_', mover: S}
+
+  - {origen: q_buscar_uno, leer: X, siguiente: q_buscar_uno, escribir: X, mover: R}
+  - {origen: q_buscar_uno, leer: '1', siguiente: q_buscar_separador, escribir: X, mover: R}
+  - {origen: q_buscar_uno, leer: '#', siguiente: q_comprobar, escribir: '#', mover: R}
+
+  - {origen: q_buscar_separador, leer: '1', siguiente: q_buscar_separador, escribir: '1', mover: R}
+  - {origen: q_buscar_separador, leer: '#', siguiente: q_buscar_bit, escribir: '#', mover: R}
+
+  - {origen: q_buscar_bit, leer: Y, siguiente: q_buscar_bit, escribir: Y, mover: R}
+  - {origen: q_buscar_bit, leer: '0', siguiente: q_regresar, escribir: Y, mover: L}
+  - {origen: q_buscar_bit, leer: '1', siguiente: q_regresar, escribir: Y, mover: L}
+  - {origen: q_buscar_bit, leer: '_', siguiente: q_rechazar, escribir: '_', mover: S}
+
+  - {origen: q_regresar, leer: '0', siguiente: q_regresar, escribir: '0', mover: L}
+  - {origen: q_regresar, leer: '1', siguiente: q_regresar, escribir: '1', mover: L}
+  - {origen: q_regresar, leer: '#', siguiente: q_regresar, escribir: '#', mover: L}
+  - {origen: q_regresar, leer: X, siguiente: q_regresar, escribir: X, mover: L}
+  - {origen: q_regresar, leer: Y, siguiente: q_regresar, escribir: Y, mover: L}
+  - {origen: q_regresar, leer: '_', siguiente: q_buscar_uno, escribir: '_', mover: R}
+
+  - {origen: q_comprobar, leer: Y, siguiente: q_comprobar, escribir: Y, mover: R}
+  - {origen: q_comprobar, leer: '_', siguiente: q_aceptar, escribir: '_', mover: S}
+  - {origen: q_comprobar, leer: '0', siguiente: q_rechazar, escribir: '0', mover: S}
+  - {origen: q_comprobar, leer: '1', siguiente: q_rechazar, escribir: '1', mover: S}
