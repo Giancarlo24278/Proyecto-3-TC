@@ -15,7 +15,7 @@ transiciones no contienen lógica específica de reconocimiento de paquetes.
 ## Modelo del motor
 
 La cinta es un diccionario que relaciona posiciones enteras con símbolos. Las
-posiciones no almacenadas contienen el blanco `_`. El cabezal empieza en la
+posiciones no almacenadas contienen el blanco `B`. El cabezal empieza en la
 posición 0, sobre el primer símbolo de la entrada; para la entrada vacía lee un
 blanco. Puede moverse hacia índices negativos. Esto representa una sola cinta
 ilimitada en ambas direcciones, sin reservar una cantidad fija de celdas.
@@ -51,7 +51,7 @@ seguido por la misma cantidad de bits. Se adopta `n >= 1`: la cadena `#` se
 rechaza porque no tiene cantidad escrita. No se permiten espacios, ceros en la
 cantidad ni separadores adicionales.
 
-El alfabeto de entrada es `{0,1,#}`. El de cinta es `{0,1,#,X,Y,_}`. `X` marca un
+El alfabeto de entrada es `{0,1,#}`. El de cinta es `{0,1,#,X,Y,B}`. `X` marca un
 uno de la cantidad ya utilizado y `Y` un bit de datos ya emparejado. Las marcas
 son internas: no se admiten en la entrada.
 
@@ -106,6 +106,13 @@ individuales. La cinta final aceptada es `XXX#YYY`; conservar los bits originale
 no es necesario para reconocer el lenguaje.
 
 ## Contrato de integración del lector YAML
+
+La definición principal está en [reconocedora.yaml](../maquinas/reconocedora.yaml),
+con el formato `mt:` y las cuatro cadenas en `inputs`. Usa `B` como blanco.
+`cargar_proyecto(ruta)` entrega la máquina y sus entradas. La versión anterior
+`reconocedora_paquetes.yaml`, con `_` como blanco, se mantiene para compatibilidad.
+El siguiente ejemplo describe el modelo interno español después de normalizar
+el YAML, no la estructura externa del nuevo archivo.
 
 El YAML usa listas de cadenas para estados y alfabetos. Los símbolos se deben
 mantener como cadenas: por eso `'0'`, `'1'`, `'#'` y `'_'` aparecen entre comillas.

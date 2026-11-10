@@ -1,0 +1,192 @@
+
+Entrada: '111#01'
+Paso 0: configuración inicial
+  Estado: q_inicio | Cabezal: 0
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   1   1   1   #   0   1   B
+  Cabezal:     ^
+
+Paso 1: δ(q_inicio, '1') = (q_buscar_separador, 'X', R)
+  Estado: q_buscar_separador | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   0   1   B
+  Cabezal:         ^
+
+Paso 2: δ(q_buscar_separador, '1') = (q_buscar_separador, '1', R)
+  Estado: q_buscar_separador | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   0   1   B
+  Cabezal:             ^
+
+Paso 3: δ(q_buscar_separador, '1') = (q_buscar_separador, '1', R)
+  Estado: q_buscar_separador | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   0   1   B
+  Cabezal:                 ^
+
+Paso 4: δ(q_buscar_separador, '#') = (q_buscar_bit, '#', R)
+  Estado: q_buscar_bit | Cabezal: 4
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   0   1   B
+  Cabezal:                     ^
+
+Paso 5: δ(q_buscar_bit, '0') = (q_regresar, 'Y', L)
+  Estado: q_regresar | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   Y   1   B
+  Cabezal:                 ^
+
+Paso 6: δ(q_regresar, '#') = (q_regresar, '#', L)
+  Estado: q_regresar | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   Y   1   B
+  Cabezal:             ^
+
+Paso 7: δ(q_regresar, '1') = (q_regresar, '1', L)
+  Estado: q_regresar | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   Y   1   B
+  Cabezal:         ^
+
+Paso 8: δ(q_regresar, '1') = (q_regresar, '1', L)
+  Estado: q_regresar | Cabezal: 0
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   Y   1   B
+  Cabezal:     ^
+
+Paso 9: δ(q_regresar, 'X') = (q_regresar, 'X', L)
+  Estado: q_regresar | Cabezal: -1
+  Índice: -2  -1   0   1   2   3   4   5   6
+  Cinta:   B   B   X   1   1   #   Y   1   B
+  Cabezal:     ^
+
+Paso 10: δ(q_regresar, 'B') = (q_buscar_uno, 'B', R)
+  Estado: q_buscar_uno | Cabezal: 0
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   Y   1   B
+  Cabezal:     ^
+
+Paso 11: δ(q_buscar_uno, 'X') = (q_buscar_uno, 'X', R)
+  Estado: q_buscar_uno | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   1   1   #   Y   1   B
+  Cabezal:         ^
+
+Paso 12: δ(q_buscar_uno, '1') = (q_buscar_separador, 'X', R)
+  Estado: q_buscar_separador | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   1   B
+  Cabezal:             ^
+
+Paso 13: δ(q_buscar_separador, '1') = (q_buscar_separador, '1', R)
+  Estado: q_buscar_separador | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   1   B
+  Cabezal:                 ^
+
+Paso 14: δ(q_buscar_separador, '#') = (q_buscar_bit, '#', R)
+  Estado: q_buscar_bit | Cabezal: 4
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   1   B
+  Cabezal:                     ^
+
+Paso 15: δ(q_buscar_bit, 'Y') = (q_buscar_bit, 'Y', R)
+  Estado: q_buscar_bit | Cabezal: 5
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   1   B
+  Cabezal:                         ^
+
+Paso 16: δ(q_buscar_bit, '1') = (q_regresar, 'Y', L)
+  Estado: q_regresar | Cabezal: 4
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:                     ^
+
+Paso 17: δ(q_regresar, 'Y') = (q_regresar, 'Y', L)
+  Estado: q_regresar | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:                 ^
+
+Paso 18: δ(q_regresar, '#') = (q_regresar, '#', L)
+  Estado: q_regresar | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:             ^
+
+Paso 19: δ(q_regresar, '1') = (q_regresar, '1', L)
+  Estado: q_regresar | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:         ^
+
+Paso 20: δ(q_regresar, 'X') = (q_regresar, 'X', L)
+  Estado: q_regresar | Cabezal: 0
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:     ^
+
+Paso 21: δ(q_regresar, 'X') = (q_regresar, 'X', L)
+  Estado: q_regresar | Cabezal: -1
+  Índice: -2  -1   0   1   2   3   4   5   6
+  Cinta:   B   B   X   X   1   #   Y   Y   B
+  Cabezal:     ^
+
+Paso 22: δ(q_regresar, 'B') = (q_buscar_uno, 'B', R)
+  Estado: q_buscar_uno | Cabezal: 0
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:     ^
+
+Paso 23: δ(q_buscar_uno, 'X') = (q_buscar_uno, 'X', R)
+  Estado: q_buscar_uno | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:         ^
+
+Paso 24: δ(q_buscar_uno, 'X') = (q_buscar_uno, 'X', R)
+  Estado: q_buscar_uno | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   1   #   Y   Y   B
+  Cabezal:             ^
+
+Paso 25: δ(q_buscar_uno, '1') = (q_buscar_separador, 'X', R)
+  Estado: q_buscar_separador | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   X   #   Y   Y   B
+  Cabezal:                 ^
+
+Paso 26: δ(q_buscar_separador, '#') = (q_buscar_bit, '#', R)
+  Estado: q_buscar_bit | Cabezal: 4
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   X   #   Y   Y   B
+  Cabezal:                     ^
+
+Paso 27: δ(q_buscar_bit, 'Y') = (q_buscar_bit, 'Y', R)
+  Estado: q_buscar_bit | Cabezal: 5
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   B   X   X   X   #   Y   Y   B
+  Cabezal:                         ^
+
+Paso 28: δ(q_buscar_bit, 'Y') = (q_buscar_bit, 'Y', R)
+  Estado: q_buscar_bit | Cabezal: 6
+  Índice: -1   0   1   2   3   4   5   6   7
+  Cinta:   B   X   X   X   #   Y   Y   B   B
+  Cabezal:                             ^
+
+Paso 29: δ(q_buscar_bit, 'B') = (q_rechazar, 'B', S)
+  Estado: q_rechazar | Cabezal: 6
+  Índice: -1   0   1   2   3   4   5   6   7
+  Cinta:   B   X   X   X   #   Y   Y   B   B
+  Cabezal:                             ^
+
+Resultado: RECHAZADA
+Motivo: Se alcanzó un estado de rechazo.
+Transiciones ejecutadas: 29
+Estado final: q_rechazar
+Cinta final: XXX#YY
+Posición final del cabezal: 6
+  Estado: q_rechazar | Cabezal: 6
+  Índice: -1   0   1   2   3   4   5   6   7
+  Cinta:   B   X   X   X   #   Y   Y   B   B
+  Cabezal:                             ^

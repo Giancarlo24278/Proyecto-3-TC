@@ -3,15 +3,15 @@
 import argparse
 from pathlib import Path
 
-from lector_yaml import ErrorDefinicion, cargar_maquina
+from lector_yaml import ErrorDefinicion, cargar_maquina, cargar_proyecto
 from motor import EstadoEjecucion, MaquinaTuring
 from visualizacion import mostrar_configuracion, mostrar_paso, mostrar_resumen
 
 
 RAIZ = Path(__file__).resolve().parent
 MAQUINAS = {
-    "reconocedora": RAIZ / "maquinas/reconocedora_paquetes.yaml",
-    "alteradora": RAIZ / "maquinas/alteradora_incremento.yaml",
+    "reconocedora": RAIZ / "maquinas/reconocedora.yaml",
+    "alteradora": RAIZ / "maquinas/alteradora.yaml",
 }
 
 
@@ -39,30 +39,49 @@ def mostrar_resultado(maquina: MaquinaTuring, entrada: str, max_pasos: int,
     mostrar_resumen(simulacion.ejecutar(max_pasos=max_pasos))
 
 
+def mostrar_lote(maquina: MaquinaTuring, entradas: tuple[str, ...], max_pasos: int,
+                 solo_resumen: bool = False) -> None:
+    print(f"Entradas configuradas en YAML: {len(entradas)}")
+    for numero, entrada in enumerate(entradas, 1):
+        print(f"\n=== Cadena {numero}/{len(entradas)} ===")
+        mostrar_resultado(maquina, entrada, max_pasos, solo_resumen)
+    if not entradas:
+        print("No hay cadenas configuradas en inputs.")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Simulador de MT de una cinta desde YAML.")
     parser.add_argument("entrada", nargs="?", help="Cadena; usa comillas para conservarla.")
     seleccion = parser.add_mutually_exclusive_group()
     seleccion.add_argument("--maquina", choices=MAQUINAS, default="reconocedora")
     seleccion.add_argument("--yaml", type=Path, help="Ruta a otra definición YAML.")
+    parser.add_argument("--interactivo", action="store_true", help="Abrir el menú en lugar del lote YAML.")
     parser.add_argument("--validar", action="store_true", help="Validar el YAML y salir.")
     parser.add_argument("--solo-resumen", action="store_true", help="Omitir los pasos intermedios.")
     parser.add_argument("--max-pasos", type=int, default=10_000)
     args = parser.parse_args()
     if args.max_pasos < 0:
         parser.error("--max-pasos debe ser no negativo")
+    if args.interactivo and args.entrada is not None:
+        parser.error("--interactivo no se combina con una entrada directa")
     ruta = args.yaml if args.yaml is not None else MAQUINAS[args.maquina]
     try:
-        maquina = cargar_maquina(ruta)
+        proyecto = cargar_proyecto(ruta)
+        maquina = proyecto.maquina
     except ErrorDefinicion as error:
         parser.exit(2, f"Error de definición: {error}\n")
     if args.validar:
         print(f"YAML válido: {ruta}")
         print(f"Estados: {len(maquina.estados)} | Transiciones: {len(maquina.transiciones)}")
+        if proyecto.entradas is not None:
+            print(f"Entradas: {len(proyecto.entradas)}")
         return
     try:
         if args.entrada is not None:
             mostrar_resultado(maquina, args.entrada, args.max_pasos, args.solo_resumen)
+            return
+        if proyecto.entradas is not None and not args.interactivo:
+            mostrar_lote(maquina, proyecto.entradas, args.max_pasos, args.solo_resumen)
             return
         print(f"MT cargada: {ruta.name}")
         print("Cada paso muestra la regla aplicada y la cinta; ^ señala el cabezal.")

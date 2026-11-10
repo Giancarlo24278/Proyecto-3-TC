@@ -1,5 +1,6 @@
 """Lectura segura y validación del formato YAML compartido por las MT."""
 
+from dataclasses import dataclass
 from pathlib import Path
 
 import yaml
@@ -59,7 +60,7 @@ def _cadena(valor, contexto, simbolo=False):
         raise ErrorDefinicion(f"{contexto}: cada símbolo debe tener un carácter.")
 
 
-def validar_definicion(datos) -> MaquinaTuring:
+def _validar_modelo(datos) -> MaquinaTuring:
     """Valida estructura y semántica antes de construir la máquina del motor.
 
     Las listas de estados terminales y las reglas pueden estar vacías. Las
@@ -110,8 +111,96 @@ def validar_definicion(datos) -> MaquinaTuring:
         raise ErrorDefinicion(f"Definición inválida: {error}") from error
 
 
-def cargar_maquina(ruta: str | Path) -> MaquinaTuring:
-    """Lee UTF-8 sin ejecutar etiquetas de objetos ni sobrescribir claves."""
+@dataclass(frozen=True)
+class ProyectoMT:
+    """Una definición validada y las entradas que acompañan al YAML.
+
+    None indica un archivo antiguo sin entradas; () un lote configurado vacío.
+    """
+
+    maquina: MaquinaTuring
+    entradas: tuple[str, ...] | None
+
+
+def _normalizar_pdf(datos):
+    _campos(datos, {"mt"}, set(), "Definición")
+    mt = datos["mt"]
+    requeridos = {
+        "states", "input_alphabet", "tape_alphabet", "initial_state",
+        "accept_states", "transitions", "inputs",
+    }
+    _campos(mt, requeridos, {"name", "blank_symbol", "reject_states"}, "mt")
+    if not isinstance(mt["inputs"], list):
+        raise ErrorDefinicion("mt.inputs: se esperaba una lista de cadenas.")
+    for indice, entrada in enumerate(mt["inputs"], 1):
+        if not isinstance(entrada, str):
+            raise ErrorDefinicion(
+                f"mt.inputs[{indice}]: se esperaba una cadena; usa comillas para los binarios."
+            )
+    normalizado = {
+        "estados": mt["states"], "alfabeto_entrada": mt["input_alphabet"],
+        "alfabeto_cinta": mt["tape_alphabet"],
+        "estado_inicial": mt["initial_state"],
+        "estados_aceptacion": mt["accept_states"],
+        "estados_rechazo": mt.get("reject_states", []),
+        "blanco": mt.get("blank_symbol", "B"), "transiciones": [],
+    }
+    if "name" in mt:
+        normalizado["nombre"] = mt["name"]
+    if not isinstance(mt["transitions"], list):
+        raise ErrorDefinicion("mt.transitions: se esperaba una lista de reglas.")
+    reglas = {}
+    for indice, regla in enumerate(mt["transitions"], 1):
+        contexto = f"mt.transitions[{indice}]"
+        _campos(regla, {"state", "read", "write", "move", "next"}, set(), contexto)
+        for campo in ("state", "move", "next"):
+            _cadena(regla[campo], f"{contexto}.{campo}")
+        leidos, escritos = regla["read"], regla["write"]
+        if isinstance(leidos, list) or isinstance(escritos, list):
+            if (not isinstance(leidos, list) or not isinstance(escritos, list)
+                    or not leidos or len(leidos) != len(escritos)):
+                raise ErrorDefinicion(
+                    f"{contexto}: read y write deben ser listas no vacías de igual longitud."
+                )
+        else:
+            leidos, escritos = [leidos], [escritos]
+        for leido, escrito in zip(leidos, escritos):
+            _cadena(leido, f"{contexto}.read", simbolo=True)
+            _cadena(escrito, f"{contexto}.write", simbolo=True)
+            nueva = {
+                "origen": regla["state"], "leer": leido,
+                "siguiente": regla["next"], "escribir": escrito, "mover": regla["move"],
+            }
+            clave = (regla["state"], leido)
+            if clave in reglas:
+                if reglas[clave] != nueva:
+                    raise ErrorDefinicion(
+                        f"{contexto}: transición duplicada incompatible para {clave!r}."
+                    )
+                # El ejemplo del documento repite exactamente la regla de B.
+                # Reutilizar la misma regla no introduce no determinismo.
+                continue
+            reglas[clave] = nueva
+            normalizado["transiciones"].append(nueva)
+    return normalizado, tuple(mt["inputs"])
+
+
+def validar_proyecto(datos) -> ProyectoMT:
+    """Acepta el esquema mt del proyecto y conserva el formato español anterior."""
+    if isinstance(datos, dict) and "mt" in datos:
+        modelo, entradas = _normalizar_pdf(datos)
+    else:
+        modelo, entradas = datos, None
+    return ProyectoMT(_validar_modelo(modelo), entradas)
+
+
+def validar_definicion(datos) -> MaquinaTuring:
+    """API compatible: valida cualquiera de los formatos y devuelve la MT."""
+    return validar_proyecto(datos).maquina
+
+
+def cargar_proyecto(ruta: str | Path) -> ProyectoMT:
+    """Lee UTF-8 con un SafeLoader que detecta claves repetidas."""
     ruta = Path(ruta)
     try:
         with ruta.open(encoding="utf-8") as archivo:
@@ -124,6 +213,11 @@ def cargar_maquina(ruta: str | Path) -> MaquinaTuring:
         detalle = getattr(error, "problem", None) or str(error)
         raise ErrorDefinicion(f"YAML inválido en {ruta}{ubicacion}: {detalle}") from error
     try:
-        return validar_definicion(datos)
+        return validar_proyecto(datos)
     except ErrorDefinicion as error:
         raise ErrorDefinicion(f"{ruta}: {error}") from error
+
+
+def cargar_maquina(ruta: str | Path) -> MaquinaTuring:
+    """API compatible para consumidores que solo necesitan la máquina."""
+    return cargar_proyecto(ruta).maquina

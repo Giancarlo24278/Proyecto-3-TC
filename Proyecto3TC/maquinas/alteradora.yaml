@@ -1,0 +1,61 @@
+# Formato del proyecto: una MT de una cinta; B es el blanco.
+# read y write son alternativas emparejadas, no cintas distintas.
+mt:
+  name: alteradora_incremento_binario
+  states: [q_inicio, q_derecha, q_sumar, q_aceptar, q_rechazar]
+  input_alphabet: ['0', '1']
+  tape_alphabet: ['0', '1', B]
+  initial_state: q_inicio
+  accept_states: [q_aceptar]
+  reject_states: [q_rechazar]
+  transitions:
+  - state: q_inicio
+    read: ['0']
+    write: ['0']
+    move: R
+    next: q_derecha
+  - state: q_inicio
+    read: ['1']
+    write: ['1']
+    move: R
+    next: q_derecha
+  - state: q_inicio
+    read: [B]
+    write: [B]
+    move: S
+    next: q_rechazar
+  - state: q_derecha
+    read: ['0']
+    write: ['0']
+    move: R
+    next: q_derecha
+  - state: q_derecha
+    read: ['1']
+    write: ['1']
+    move: R
+    next: q_derecha
+  - state: q_derecha
+    read: [B]
+    write: [B]
+    move: L
+    next: q_sumar
+  - state: q_sumar
+    read: ['1']
+    write: ['0']
+    move: L
+    next: q_sumar
+  - state: q_sumar
+    read: ['0']
+    write: ['1']
+    move: S
+    next: q_aceptar
+  - state: q_sumar
+    read: [B]
+    write: ['1']
+    move: S
+    next: q_aceptar
+  inputs:
+  - '10100'
+  - '10111'
+  - '00000'
+  - '11111'

@@ -18,15 +18,15 @@ de efectuar transiciones. Un límite de pasos puede interrumpir la ejecución.
 Es una MT alteradora porque **su resultado es el contenido modificado de la
 cinta**, además de alcanzar un estado de aceptación. Usa el mismo motor de una
 cinta que la reconocedora, sin realizar la suma mediante código Python.
-El YAML está en [alteradora_incremento.yaml](../maquinas/alteradora_incremento.yaml).
+El YAML está en [alteradora.yaml](../maquinas/alteradora.yaml).
 
 ## Definición formal
 
 Se utiliza la variante `M = (Q, Σ, Γ, δ, q₀, B, Fₐ, Fᵣ)` con:
 
 - `Q = {q_inicio, q_derecha, q_sumar, q_aceptar, q_rechazar}`.
-- `Σ = {0,1}` y `Γ = {0,1,_}`.
-- `q₀ = q_inicio` y blanco `B = _`.
+- `Σ = {0,1}` y `Γ = {0,1,B}`.
+- `q₀ = q_inicio` y el símbolo blanco es `B`.
 - `Fₐ = {q_aceptar}` y `Fᵣ = {q_rechazar}`.
 - `δ: (Q − (Fₐ ∪ Fᵣ)) × Γ → Q × Γ × {L,R,S}`, definida por las reglas siguientes.
 
@@ -38,13 +38,13 @@ después se mueve y se cambia de estado.
 | --- | --- | --- | --- | --- |
 | `q_inicio` | `0` | `q_derecha` | `0` | R |
 | `q_inicio` | `1` | `q_derecha` | `1` | R |
-| `q_inicio` | `_` | `q_rechazar` | `_` | S |
+| `q_inicio` | `B` | `q_rechazar` | `B` | S |
 | `q_derecha` | `0` | `q_derecha` | `0` | R |
 | `q_derecha` | `1` | `q_derecha` | `1` | R |
-| `q_derecha` | `_` | `q_sumar` | `_` | L |
+| `q_derecha` | `B` | `q_sumar` | `B` | L |
 | `q_sumar` | `1` | `q_sumar` | `0` | L |
 | `q_sumar` | `0` | `q_aceptar` | `1` | S |
-| `q_sumar` | `_` | `q_aceptar` | `1` | S |
+| `q_sumar` | `B` | `q_aceptar` | `1` | S |
 
 Los estados terminales no tienen salidas. Las reglas ausentes significan rechazo.
 
@@ -103,28 +103,33 @@ omite blancos exteriores; la posición del cabezal puede estar fuera de él.
 | 3 | `q_derecha` | 3 | `1 / 1 / R` | `11111` |
 | 4 | `q_derecha` | 4 | `1 / 1 / R` | `11111` |
 | 5 | `q_derecha` | 5 | `1 / 1 / R` | `11111` |
-| 6 | `q_sumar` | 4 | `_ / _ / L` | `11111` |
+| 6 | `q_sumar` | 4 | `B / B / L` | `11111` |
 | 7 | `q_sumar` | 3 | `1 / 0 / L` | `11110` |
 | 8 | `q_sumar` | 2 | `1 / 0 / L` | `11100` |
 | 9 | `q_sumar` | 1 | `1 / 0 / L` | `11000` |
 | 10 | `q_sumar` | 0 | `1 / 0 / L` | `10000` |
 | 11 | `q_sumar` | -1 | `1 / 0 / L` | `00000` |
-| 12 | `q_aceptar` | -1 | `_ / 1 / S` | `100000` |
+| 12 | `q_aceptar` | -1 | `B / 1 / S` | `100000` |
 
 La salida ocupa las posiciones `-1..4`. El cabezal termina sobre el bit donde
 se resolvió el acarreo; no se reposiciona automáticamente al comienzo.
 
 ## Cómo ejecutar esta parte
 
-Sigue la instalación de [README](../README.md) y, desde `Proyecto3TC`, ejecuta:
+Las cuatro cadenas están dentro de `mt.inputs`. El archivo anterior
+`alteradora_incremento.yaml` se conserva con el formato español y `_` como
+blanco; la definición principal utiliza `B`, igual que el documento.
+
+Sigue la instalación del [README de la raíz](../../README.md). Desde esa raíz:
 
 ```bash
-.venv/bin/python simulador.py --maquina alteradora --validar
-.venv/bin/python simulador.py --maquina alteradora "11111"
-.venv/bin/python -m unittest discover -s pruebas -v
+.venv/bin/python Proyecto3TC/simulador.py --maquina alteradora --validar
+.venv/bin/python ejecutar.py alteradora
+.venv/bin/python Proyecto3TC/simulador.py --maquina alteradora "11111"
+.venv/bin/python -m unittest discover -s Proyecto3TC/pruebas -t Proyecto3TC -v
 ```
 
 En Windows / PowerShell sustituye `.venv/bin/python` por
-`.\.venv\Scripts\python.exe`. Sin cadena, el primer comando sin `--validar`
-abre el menú de la máquina seleccionada. Para ocultar los pasos usa
-`--solo-resumen`; para configurar el límite usa `--max-pasos`.
+`.\.venv\Scripts\python.exe`. Sin cadena, se ejecutan las cuatro entradas YAML.
+Para abrir el menú usa `--interactivo`; para ocultar pasos, `--solo-resumen`;
+para configurar el límite por cadena, `--max-pasos`.

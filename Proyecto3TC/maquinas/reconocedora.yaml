@@ -1,0 +1,131 @@
+# Formato del proyecto: una MT de una cinta; B es el blanco.
+# read y write son alternativas emparejadas, no cintas distintas.
+mt:
+  name: reconocedora_paquetes
+  states: [q_inicio, q_buscar_uno, q_buscar_separador, q_buscar_bit, q_regresar, q_comprobar, q_aceptar, q_rechazar]
+  input_alphabet: ['0', '1', '#']
+  tape_alphabet: ['0', '1', '#', X, Y, B]
+  initial_state: q_inicio
+  accept_states: [q_aceptar]
+  reject_states: [q_rechazar]
+  transitions:
+  - state: q_inicio
+    read: ['1']
+    write: [X]
+    move: R
+    next: q_buscar_separador
+  - state: q_inicio
+    read: ['0']
+    write: ['0']
+    move: S
+    next: q_rechazar
+  - state: q_inicio
+    read: ['#']
+    write: ['#']
+    move: S
+    next: q_rechazar
+  - state: q_inicio
+    read: [B]
+    write: [B]
+    move: S
+    next: q_rechazar
+  - state: q_buscar_uno
+    read: [X]
+    write: [X]
+    move: R
+    next: q_buscar_uno
+  - state: q_buscar_uno
+    read: ['1']
+    write: [X]
+    move: R
+    next: q_buscar_separador
+  - state: q_buscar_uno
+    read: ['#']
+    write: ['#']
+    move: R
+    next: q_comprobar
+  - state: q_buscar_separador
+    read: ['1']
+    write: ['1']
+    move: R
+    next: q_buscar_separador
+  - state: q_buscar_separador
+    read: ['#']
+    write: ['#']
+    move: R
+    next: q_buscar_bit
+  - state: q_buscar_bit
+    read: [Y]
+    write: [Y]
+    move: R
+    next: q_buscar_bit
+  - state: q_buscar_bit
+    read: ['0']
+    write: [Y]
+    move: L
+    next: q_regresar
+  - state: q_buscar_bit
+    read: ['1']
+    write: [Y]
+    move: L
+    next: q_regresar
+  - state: q_buscar_bit
+    read: [B]
+    write: [B]
+    move: S
+    next: q_rechazar
+  - state: q_regresar
+    read: ['0']
+    write: ['0']
+    move: L
+    next: q_regresar
+  - state: q_regresar
+    read: ['1']
+    write: ['1']
+    move: L
+    next: q_regresar
+  - state: q_regresar
+    read: ['#']
+    write: ['#']
+    move: L
+    next: q_regresar
+  - state: q_regresar
+    read: [X]
+    write: [X]
+    move: L
+    next: q_regresar
+  - state: q_regresar
+    read: [Y]
+    write: [Y]
+    move: L
+    next: q_regresar
+  - state: q_regresar
+    read: [B]
+    write: [B]
+    move: R
+    next: q_buscar_uno
+  - state: q_comprobar
+    read: [Y]
+    write: [Y]
+    move: R
+    next: q_comprobar
+  - state: q_comprobar
+    read: [B]
+    write: [B]
+    move: S
+    next: q_aceptar
+  - state: q_comprobar
+    read: ['0']
+    write: ['0']
+    move: S
+    next: q_rechazar
+  - state: q_comprobar
+    read: ['1']
+    write: ['1']
+    move: S
+    next: q_rechazar
+  inputs:
+  - 111#010
+  - 1111#1010
+  - 111#01
+  - 11#010

@@ -1,127 +1,132 @@
 # Lectura del YAML y visualización
 
-## Parte implementada
-
-Se completó la integración que faltaba sobre el motor existente:
+## Arquitectura
 
 | Archivo | Responsabilidad |
 | --- | --- |
-| `lector_yaml.py` | Leer UTF-8, validar estructura y reglas, construir `MaquinaTuring`. |
+| `lector_yaml.py` | Leer UTF-8, validar los dos formatos y crear la MT junto a sus entradas. |
+| `motor.py` | Simular una cinta, estado, cabezal y reglas; guardar configuraciones inmutables. |
 | `visualizacion.py` | Dibujar índices, símbolos, cabezal y estado; imprimir cada regla y resultado. |
-| `simulador.py` | Seleccionar máquina o archivo, validar, ejecutar y ofrecer el menú. |
-| `maquinas/alteradora_incremento.yaml` | Definir la MT que incrementa un binario. |
-| `ejemplos/alteradora.json` | Registrar cuatro entradas, salidas, pasos y explicación. |
-| `pruebas/test_integracion.py` | Verificar lector, alteradora e interfaz junto a las pruebas existentes. |
+| `simulador.py` | Seleccionar archivo, validar y ejecutar una cadena, un lote o el menú. |
+| `../../ejecutar.py` | Lanzar desde la raíz las cuatro entradas de cada máquina. |
 
-`motor.py` conserva su implementación y sus objetos `Configuracion`, `Paso` y
-`Resultado`. `cargar_reconocedora()` permanece disponible para las integraciones
-previas, pero ahora usa el lector general. No se añaden dependencias aparte de
-PyYAML, ya requerido por el proyecto.
+El motor no interpreta YAML ni suma binarios mediante código especial: ambas
+máquinas se definen exclusivamente con reglas. Cada entrada inicia una nueva
+simulación con cinta y cabezal independientes.
 
-## Formato YAML
+## Esquema del documento del proyecto
 
-La raíz debe ser un mapa. Campos obligatorios:
+La raíz contiene únicamente `mt`. Dentro de ese mapa son obligatorios:
 
 | Campo | Tipo y significado |
 | --- | --- |
-| `estados` | Lista de nombres de estados, no vacía y sin duplicados. |
-| `alfabeto_entrada` | Lista de símbolos de un carácter, sin duplicados. |
-| `alfabeto_cinta` | Lista de símbolos de un carácter, sin duplicados; incluye al blanco y al alfabeto de entrada. |
-| `blanco` | Símbolo de un carácter; no pertenece al alfabeto de entrada. |
-| `estado_inicial` | Nombre de un estado declarado. |
-| `estados_aceptacion` | Lista de estados declarados que detienen con aceptación. |
-| `estados_rechazo` | Lista de estados declarados que detienen con rechazo. |
-| `transiciones` | Lista de mapas con los cinco campos de cada regla. |
+| `states` | Lista no vacía de nombres de estados, sin duplicados. |
+| `input_alphabet` | Lista de símbolos de entrada de un carácter, sin duplicados. |
+| `tape_alphabet` | Lista de símbolos de un carácter; contiene entrada y blanco. |
+| `initial_state` | Estado inicial declarado. |
+| `accept_states` | Lista de estados de aceptación declarados. |
+| `transitions` | Lista de mapas con `state`, `read`, `write`, `move` y `next`. |
+| `inputs` | Lista de cadenas que se simulan en orden. |
 
-`nombre` es opcional y, si aparece, debe ser una cadena no vacía. No se admiten
-campos desconocidos, nombres vacíos ni valores compuestos solo de espacios.
-Las listas de aceptación, rechazo y transiciones pueden estar vacías. Las listas
-de estados y alfabetos contienen cadenas; escribe `'0'`, `'1'` y `'#'` entre
-comillas para que YAML no los interprete como números, booleanos o comentarios.
-El índice de una regla en los diagnósticos empieza en 1.
+Se aceptan como extensiones opcionales `name`, `blank_symbol` y `reject_states`.
+El blanco predeterminado es `B`. El alfabeto de entrada no contiene el blanco.
+Los estados de rechazo predeterminados forman una lista vacía; la falta de regla
+sigue significando rechazo. Estados de aceptación y rechazo son disjuntos y no
+tienen transiciones de salida. `L`, `R` y `S` son los movimientos permitidos.
+No se admiten campos desconocidos ni nombres vacíos o compuestos solo de espacios.
+
+`inputs` admite una lista vacía, que termina sin abrir el menú, y admite la cadena
+vacía como caso a simular. Los elementos deben ser cadenas: escribe los binarios
+entre comillas para que YAML no elimine ceros iniciales ni los convierta en
+números. Una entrada con símbolos ajenos al alfabeto produce rechazo de esa
+cadena, y no impide ejecutar las demás.
+
+### Interpretación de read y write
+
+El ejemplo del documento utiliza listas pese a exigir una sola cinta y no
+precisa su semántica. Se adopta y documenta esta interpretación: las listas son
+alternativas emparejadas para una única celda por transición.
 
 ```yaml
-- origen: q_sumar
-  leer: '0'
-  siguiente: q_aceptar
-  escribir: '1'
-  mover: S
+- state: q0
+  read: [a, B]
+  write: [X, Y]
+  move: R
+  next: q1
 ```
 
-Cada regla debe contener exactamente `origen`, `leer`, `siguiente`, `escribir` y
-`mover`, todos cadenas. Los estados y símbolos deben estar declarados, los
-movimientos son `L`, `R` o `S` y los terminales no admiten reglas de salida.
-Aceptación y rechazo son conjuntos disjuntos. Solo puede existir una regla por
-par `(origen, leer)`: se detecta el duplicado antes de crear el diccionario.
-Se permiten tablas parciales; una regla ausente significa rechazo, según el
-contrato del motor.
+Esto equivale a dos reglas: al leer `a` escribe `X`; al leer `B` escribe `Y`.
+En ambos casos avanza una celda y entra en `q1`. No se crean dos cintas ni se
+leen dos posiciones a la vez. Ambas listas deben tener igual longitud y ser no
+vacías. También se admiten símbolos escalares, como `read: a` y `write: X`.
+Si uno de esos campos es lista, el otro también debe serlo.
 
-También se rechazan **claves YAML repetidas**, tanto en la raíz como dentro de
-una regla. El lector deriva de `yaml.SafeLoader`, por lo que las etiquetas de
-objetos Python no se ejecutan. No se permiten claves no textuales ni varios
-documentos dentro de un mismo archivo.
+El ejemplo original repite la misma regla del blanco al expandir dos listas.
+El normalizador unifica reglas exactamente equivalentes. Una repetición con
+diferente escritura, movimiento o siguiente estado se rechaza porque introduciría
+no determinismo. Las claves YAML repetidas siempre son un error.
 
-## Flujo y diagnósticos
+## Compatibilidad y API
 
-1. `cargar_maquina(ruta)` lee el archivo UTF-8 con el cargador seguro.
-2. `validar_definicion(datos)` comprueba los campos, sus tipos y cada regla.
-3. Se crea `MaquinaTuring`; el motor comprueba además sus invariantes semánticas.
-4. La interfaz recibe la máquina validada y comienza la simulación.
+Se conservan los YAML anteriores `reconocedora_paquetes.yaml` y
+`alteradora_incremento.yaml`. Su estructura usa `estados`, `alfabeto_entrada`,
+`alfabeto_cinta`, `blanco`, `estado_inicial`, `estados_aceptacion`,
+`estados_rechazo` y `transiciones`. Cada regla usa `origen`, `leer`, `siguiente`,
+`escribir` y `mover`. En ese formato no se admite `inputs` y los duplicados de
+transición se rechazan incluso si son equivalentes, preservando el contrato
+anterior. Esos archivos usan `_` como blanco.
 
-Los problemas se exponen mediante `ErrorDefinicion`, derivada de `ValueError`.
-Un error de sintaxis incluye archivo, línea y columna cuando PyYAML las aporta.
-Los errores de estructura identifican el campo o la regla; los errores
-semánticos del motor conservan su explicación. Un archivo inexistente o con
-codificación inválida también produce un diagnóstico controlado. La interfaz
-escribe el error en stderr y sale con código 2, sin traceback.
+`cargar_proyecto(ruta)` devuelve un `ProyectoMT` con `maquina` y `entradas`.
+`entradas` es una tupla para el formato nuevo; `None` identifica un archivo
+anterior sin lote. `validar_proyecto(datos)` ofrece lo mismo desde datos ya
+leídos. `cargar_maquina(ruta)` y `validar_definicion(datos)` conservan la API
+que devuelve solo `MaquinaTuring` y admiten ambos formatos.
 
 ```python
-from lector_yaml import cargar_maquina
+from lector_yaml import cargar_proyecto
 
-maquina = cargar_maquina('maquinas/alteradora_incremento.yaml')
-resultado = maquina.ejecutar('11111', max_pasos=100)
-assert resultado.final.contenido() == '100000'
+proyecto = cargar_proyecto('maquinas/alteradora.yaml')
+for entrada in proyecto.entradas:
+    resultado = proyecto.maquina.ejecutar(entrada)
+    print(entrada, resultado.estado.value, resultado.final.contenido())
 ```
 
-## Visualización de la ejecución
+## Validación y diagnósticos
 
-La visualización es textual en terminal y funciona con ambas máquinas y con
-otras definiciones compatibles. Primero dibuja el paso 0. Cada llamada a
-`simulacion.paso()` aplica una única transición y genera una vista con:
+El cargador deriva de `yaml.SafeLoader`: no ejecuta etiquetas de objetos Python,
+comprueba las claves repetidas y no admite claves no textuales ni varios
+documentos en el mismo archivo. Después se comprueban tipos y campos, se
+normalizan las reglas y se verifican los invariantes semánticos del motor.
 
-- Número de paso y regla aplicada, incluyendo lectura, escritura y movimiento.
-- Estado y posición del cabezal **después** de esa transición.
-- Índices de las celdas y símbolos de la cinta, con blancos de margen.
-- Marcador `^` alineado con la celda del cabezal.
+Los problemas se exponen como `ErrorDefinicion`, derivada de `ValueError`. Los
+errores de sintaxis incluyen archivo, línea y columna cuando PyYAML los aporta.
+Los errores de estructura identifican el campo o la regla, con índices desde 1.
+Se controlan archivos inexistentes y UTF-8 inválido. La interfaz informa el error
+en stderr y termina con código 2, sin traceback.
 
-La configuración previa de un paso corresponde a la vista del paso anterior.
-No se omiten transiciones de regreso, marcas o movimientos sobre blancos. El
-intervalo dibujado incluye el origen, el contenido no blanco y el cabezal,
-incluso si sus índices son negativos. La anchura de las columnas se ajusta a
-los índices. El resumen siempre vuelve a dibujar la cinta final y distingue
-`ACEPTADA`, `RECHAZADA` y `LIMITE_ALCANZADO`.
+## Visualización y ejecución por lotes
 
-La interfaz usa `simulacion.ejecutar(max_pasos=...)` al finalizar el recorrido
-visible; el límite cuenta desde el inicio, sin repetir las transiciones ya
-mostradas. Así se respeta la aceptación exactamente en el último paso permitido
-y el rechazo por regla ausente sin consumir otro paso. `--solo-resumen` ejecuta
-la misma máquina y omite la impresión intermedia. No hay pausas entre pasos:
-la traza completa puede revisarse en la terminal o guardarse redirigiendo stdout.
+Por cada cadena, la interfaz muestra su número en el lote, la configuración
+inicial (paso 0), y cada transición con lectura, escritura y movimiento. La vista
+incluye estado, índices, contenido de cinta y un `^` alineado con el cabezal.
+Cada vista posterior corresponde a una única transición. No se omiten regresos,
+marcas ni movimientos sobre blancos. La ventana incluye el origen, todos los
+símbolos no blancos y el cabezal, incluso en posiciones negativas.
 
-El límite predeterminado es 10000 transiciones. Alcanzarlo no prueba rechazo;
-la vista lo identifica como ejecución incompleta. El motor conserva todas las
-instantáneas en memoria, incluso con `--solo-resumen`. Una traza larga puede
-ocupar bastante salida y memoria; se puede reducir `--max-pasos`.
+El resumen siempre vuelve a dibujar la cinta final e informa aceptación,
+rechazo o límite. Se omiten únicamente los blancos exteriores del contenido
+final. El límite predeterminado es 10000 transiciones **por cadena**. Alcanzarlo
+no prueba rechazo y la cinta se identifica como parcial. La aceptación justo
+en el último paso permitido se respeta. `--solo-resumen` omite la impresión de
+pasos, conservando el mismo resultado. No hay pausas entre pasos; la traza se
+puede revisar con el scroll o guardar redirigiendo stdout.
 
-## Verificación y ejecución
+Sin cadena explícita se recorren todos los `inputs` del YAML. Una cadena pasada
+como argumento sustituye al lote. `--interactivo` abre el menú manual. Los
+archivos anteriores sin entradas abren el menú si no se pasa una cadena.
+`--validar` verifica el archivo y cuenta sus entradas sin simular.
 
-`pruebas/test_integracion.py` cubre errores de sintaxis, estructura, tipos,
-duplicados, estados y símbolos externos, movimientos inválidos y terminales con
-salidas. También verifica ausencia de archivo, UTF-8 inválido y etiquetas no
-seguras; la alteradora se compara con un oráculo aritmético independiente.
-Las pruebas de CLI verifican selección de YAML, menús, trazas completas, resumen,
-rechazo, límite y aceptación justo en el límite, así como la alineación del
-cabezal con índices negativos y positivos fuera del contenido.
-
-Las instrucciones de instalación para macOS, Linux y Windows, los comandos para
-validar, simular y ejecutar las pruebas están en [README](../README.md).
+El motor conserva las instantáneas del historial en memoria aun en modo resumen.
+El costo del historial es O(P·C), para P pasos y un máximo de C celdas no blancas;
+la cinta sigue siendo única. Consulta el [README principal](../../README.md)
+para instalar, ejecutar, usar VS Code y correr las pruebas.

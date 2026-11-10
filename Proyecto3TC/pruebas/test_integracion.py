@@ -24,7 +24,7 @@ RAIZ = Path(__file__).resolve().parents[1]
 
 class PruebasLector(unittest.TestCase):
     def setUp(self):
-        self.datos = yaml.safe_load(MAQUINAS['alteradora'].read_text(encoding='utf-8'))
+        self.datos = yaml.safe_load((RAIZ / 'maquinas/alteradora_incremento.yaml').read_text(encoding='utf-8'))
 
     def cargar_texto(self, texto):
         with tempfile.TemporaryDirectory() as carpeta:
@@ -202,7 +202,7 @@ class PruebasInterfaz(unittest.TestCase):
         r = self.ejecutar_cli('111#010', '--solo-resumen')
         self.assertIn('Resultado: ACEPTADA', r.stdout)
         self.assertIn('Cinta final: XXX#YYY', r.stdout)
-        r = self.ejecutar_cli('--maquina', 'alteradora', entrada='1\n10100\n0\n')
+        r = self.ejecutar_cli('--maquina', 'alteradora', '--interactivo', entrada='1\n10100\n0\n')
         self.assertEqual(r.returncode, 0, r.stderr)
         self.assertIn('Cinta final: 10101', r.stdout)
         self.assertIn('Simulador cerrado', r.stdout)
@@ -223,7 +223,7 @@ class PruebasInterfaz(unittest.TestCase):
                 self.assertIn(str(c.cabezal), lineas[1])
 
     def test_vista_regla_ausente_y_rechazo_inicial(self):
-        datos = yaml.safe_load(MAQUINAS['alteradora'].read_text(encoding='utf-8'))
+        datos = yaml.safe_load((RAIZ / 'maquinas/alteradora_incremento.yaml').read_text(encoding='utf-8'))
         datos['transiciones'] = []
         for maquina, entrada in ((validar_definicion(datos), '0'),
                                  (cargar_maquina(MAQUINAS['alteradora']), 'X')):

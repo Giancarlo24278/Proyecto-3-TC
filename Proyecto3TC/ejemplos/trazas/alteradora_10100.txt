@@ -3,49 +3,49 @@ Entrada: '10100'
 Paso 0: configuración inicial
   Estado: q_inicio | Cabezal: 0
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   0   _
+  Cinta:   B   1   0   1   0   0   B
   Cabezal:     ^
 
 Paso 1: δ(q_inicio, '1') = (q_derecha, '1', R)
   Estado: q_derecha | Cabezal: 1
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   0   _
+  Cinta:   B   1   0   1   0   0   B
   Cabezal:         ^
 
 Paso 2: δ(q_derecha, '0') = (q_derecha, '0', R)
   Estado: q_derecha | Cabezal: 2
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   0   _
+  Cinta:   B   1   0   1   0   0   B
   Cabezal:             ^
 
 Paso 3: δ(q_derecha, '1') = (q_derecha, '1', R)
   Estado: q_derecha | Cabezal: 3
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   0   _
+  Cinta:   B   1   0   1   0   0   B
   Cabezal:                 ^
 
 Paso 4: δ(q_derecha, '0') = (q_derecha, '0', R)
   Estado: q_derecha | Cabezal: 4
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   0   _
+  Cinta:   B   1   0   1   0   0   B
   Cabezal:                     ^
 
 Paso 5: δ(q_derecha, '0') = (q_derecha, '0', R)
   Estado: q_derecha | Cabezal: 5
   Índice: -1   0   1   2   3   4   5   6
-  Cinta:   _   1   0   1   0   0   _   _
+  Cinta:   B   1   0   1   0   0   B   B
   Cabezal:                         ^
 
-Paso 6: δ(q_derecha, '_') = (q_sumar, '_', L)
+Paso 6: δ(q_derecha, 'B') = (q_sumar, 'B', L)
   Estado: q_sumar | Cabezal: 4
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   0   _
+  Cinta:   B   1   0   1   0   0   B
   Cabezal:                     ^
 
 Paso 7: δ(q_sumar, '0') = (q_aceptar, '1', S)
   Estado: q_aceptar | Cabezal: 4
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   1   _
+  Cinta:   B   1   0   1   0   1   B
   Cabezal:                     ^
 
 Resultado: ACEPTADA
@@ -56,5 +56,5 @@ Cinta final: 10101
 Posición final del cabezal: 4
   Estado: q_aceptar | Cabezal: 4
   Índice: -1   0   1   2   3   4   5
-  Cinta:   _   1   0   1   0   1   _
+  Cinta:   B   1   0   1   0   1   B
   Cabezal:                     ^
