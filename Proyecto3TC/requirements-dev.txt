@@ -1,2 +1,2 @@
-# Lectura del YAML de la reconocedora; el motor usa la biblioteca estándar.
+# Lectura y validación de YAML; el motor y las pruebas usan la biblioteca estándar.
 PyYAML>=6.0,<7

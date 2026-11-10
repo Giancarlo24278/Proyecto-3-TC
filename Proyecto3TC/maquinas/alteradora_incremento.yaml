@@ -1,0 +1,20 @@
+# Suma uno a un binario no vacío. Conserva ceros iniciales y amplía la cinta
+# por la izquierda si hay acarreo final. La entrada vacía se rechaza.
+nombre: alteradora_incremento_binario
+estados: [q_inicio, q_derecha, q_sumar, q_aceptar, q_rechazar]
+alfabeto_entrada: ['0', '1']
+alfabeto_cinta: ['0', '1', '_']
+blanco: '_'
+estado_inicial: q_inicio
+estados_aceptacion: [q_aceptar]
+estados_rechazo: [q_rechazar]
+transiciones:
+  - {origen: q_inicio, leer: '0', siguiente: q_derecha, escribir: '0', mover: R}
+  - {origen: q_inicio, leer: '1', siguiente: q_derecha, escribir: '1', mover: R}
+  - {origen: q_inicio, leer: '_', siguiente: q_rechazar, escribir: '_', mover: S}
+  - {origen: q_derecha, leer: '0', siguiente: q_derecha, escribir: '0', mover: R}
+  - {origen: q_derecha, leer: '1', siguiente: q_derecha, escribir: '1', mover: R}
+  - {origen: q_derecha, leer: '_', siguiente: q_sumar, escribir: '_', mover: L}
+  - {origen: q_sumar, leer: '1', siguiente: q_sumar, escribir: '0', mover: L}
+  - {origen: q_sumar, leer: '0', siguiente: q_aceptar, escribir: '1', mover: S}
+  - {origen: q_sumar, leer: '_', siguiente: q_aceptar, escribir: '1', mover: S}

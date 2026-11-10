@@ -1,0 +1,78 @@
+
+Entrada: '10111'
+Paso 0: configuración inicial
+  Estado: q_inicio | Cabezal: 0
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   1   _
+  Cabezal:     ^
+
+Paso 1: δ(q_inicio, '1') = (q_derecha, '1', R)
+  Estado: q_derecha | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   1   _
+  Cabezal:         ^
+
+Paso 2: δ(q_derecha, '0') = (q_derecha, '0', R)
+  Estado: q_derecha | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   1   _
+  Cabezal:             ^
+
+Paso 3: δ(q_derecha, '1') = (q_derecha, '1', R)
+  Estado: q_derecha | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   1   _
+  Cabezal:                 ^
+
+Paso 4: δ(q_derecha, '1') = (q_derecha, '1', R)
+  Estado: q_derecha | Cabezal: 4
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   1   _
+  Cabezal:                     ^
+
+Paso 5: δ(q_derecha, '1') = (q_derecha, '1', R)
+  Estado: q_derecha | Cabezal: 5
+  Índice: -1   0   1   2   3   4   5   6
+  Cinta:   _   1   0   1   1   1   _   _
+  Cabezal:                         ^
+
+Paso 6: δ(q_derecha, '_') = (q_sumar, '_', L)
+  Estado: q_sumar | Cabezal: 4
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   1   _
+  Cabezal:                     ^
+
+Paso 7: δ(q_sumar, '1') = (q_sumar, '0', L)
+  Estado: q_sumar | Cabezal: 3
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   1   0   _
+  Cabezal:                 ^
+
+Paso 8: δ(q_sumar, '1') = (q_sumar, '0', L)
+  Estado: q_sumar | Cabezal: 2
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   1   0   0   _
+  Cabezal:             ^
+
+Paso 9: δ(q_sumar, '1') = (q_sumar, '0', L)
+  Estado: q_sumar | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   0   0   0   0   _
+  Cabezal:         ^
+
+Paso 10: δ(q_sumar, '0') = (q_aceptar, '1', S)
+  Estado: q_aceptar | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   1   0   0   0   _
+  Cabezal:         ^
+
+Resultado: ACEPTADA
+Motivo: Se alcanzó un estado de aceptación.
+Transiciones ejecutadas: 10
+Estado final: q_aceptar
+Cinta final: 11000
+Posición final del cabezal: 1
+  Estado: q_aceptar | Cabezal: 1
+  Índice: -1   0   1   2   3   4   5
+  Cinta:   _   1   1   0   0   0   _
+  Cabezal:         ^

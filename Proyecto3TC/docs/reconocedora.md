@@ -4,10 +4,11 @@
 
 Se implementó un motor genérico para máquinas de Turing deterministas de **una
 sola cinta**, una MT reconocedora de paquetes y cuatro entradas de ejemplo.
-`simulador.py` permite probar paquetes desde la terminal y muestra un resumen
-del resultado; el README explica cómo ejecutarla. Su adaptador mínimo lee el
-YAML propio y también se usa en las pruebas. El lector general y la visualización
-de cada paso están pendientes de integración.
+`simulador.py` permite probar paquetes desde la terminal y muestra cada
+transición y la cinta final; el README explica cómo ejecutarla. El lector general
+`lector_yaml.py` valida las definiciones de ambas máquinas y `visualizacion.py`
+dibuja las configuraciones. La integración se documenta en
+[lectura_visualizacion.md](lectura_visualizacion.md).
 El motor también puede ejecutar una MT alteradora: las
 transiciones no contienen lógica específica de reconocimiento de paquetes.
 
@@ -112,14 +113,16 @@ Cada elemento de `transiciones` tiene `origen`, `leer`, `siguiente`, `escribir` 
 `mover`. La lista de reglas no tiene que cubrir todas las combinaciones: las
 ausentes rechazan.
 
-El lector general debe verificar la estructura del YAML, los campos y sus
-tipos, y rechazar reglas duplicadas para un mismo par `(origen, leer)` **antes de
+El lector general verifica la estructura del YAML, los campos y sus
+tipos, y rechaza reglas duplicadas para un mismo par `(origen, leer)` **antes de
 crear un diccionario**, porque un diccionario sobrescribiría la regla anterior.
 El motor comprueba además invariantes de su definición: símbolos y estados
 declarados, movimientos válidos y separación de estados de aceptación y rechazo.
 Los estados terminales no llevan reglas de salida.
 
-Una vez que el lector entregue `datos`, un diccionario validado, se conecta así:
+La integración habitual es `cargar_maquina(ruta)` de `lector_yaml.py`, que
+entrega directamente una `MaquinaTuring` validada. Internamente se convierte
+la lista YAML al contrato del motor de la siguiente forma:
 
 ```python
 from motor import MaquinaTuring, Transicion

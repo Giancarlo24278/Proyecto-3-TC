@@ -1,0 +1,6 @@
+[
+  {"entrada": "10100", "salida": "10101", "aceptada": true, "pasos": 7, "explicacion": "Sin acarreo: 20 + 1 = 21."},
+  {"entrada": "10111", "salida": "11000", "aceptada": true, "pasos": 10, "explicacion": "Acarreo sobre tres unos: 23 + 1 = 24."},
+  {"entrada": "00000", "salida": "00001", "aceptada": true, "pasos": 7, "explicacion": "Conserva el ancho y los ceros iniciales: 0 + 1 = 1."},
+  {"entrada": "11111", "salida": "100000", "aceptada": true, "pasos": 12, "explicacion": "Acarreo final: escribe en la posición -1; 31 + 1 = 32."}
+]
